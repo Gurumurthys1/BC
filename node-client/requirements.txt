@@ -1,0 +1,7 @@
+supabase
+web3
+ezkl
+numpy
+onnx
+python-dotenv
+requests
