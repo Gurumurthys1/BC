@@ -5,8 +5,9 @@ services:
     env: node
     region: oregon
     plan: free
-    buildCommand: cd web && npm install && npm run build
-    startCommand: cd web && npm start
+    root: web
+    buildCommand: npm install && npm run build
+    startCommand: npm start
     envVars:
       - key: NEXT_PUBLIC_CONTRACT_ADDRESS
         value: 0x9EE623E30Ad75C156099d9309924bd989b8f37c4
