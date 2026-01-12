@@ -1,0 +1,51 @@
+services:
+  # Next.js Frontend - Main User Interface
+  - type: web
+    name: oblivion-frontend
+    env: node
+    region: oregon
+    plan: free
+    buildCommand: cd web && npm install && npm run build
+    startCommand: cd web && npm start
+    envVars:
+      - key: NEXT_PUBLIC_CONTRACT_ADDRESS
+        value: 0x9EE623E30Ad75C156099d9309924bd989b8f37c4
+      - key: NODE_ENV
+        value: production
+
+  # Python Worker Node - ML Training Background Service
+  # Note: Background workers require a paid plan on Render
+  - type: worker
+    name: oblivion-worker
+    env: python
+    region: oregon
+    plan: starter  # $7/month minimum for background workers
+    buildCommand: cd node-client && pip install -r requirements.txt
+    startCommand: cd node-client && python decentralized_worker.py
+    envVars:
+      - key: RPC_URL
+        value: https://polygon-amoy-bor-rpc.publicnode.com
+      - key: CONTRACT_ADDRESS
+        value: 0x9EE623E30Ad75C156099d9309924bd989b8f37c4
+      # These must be added manually in Render dashboard for security
+      - key: PRIVATE_KEY
+        sync: false
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_KEY
+        sync: false
+
+  # Streamlit Visualizer - Analytics Dashboard (Optional)
+  - type: web
+    name: oblivion-visualizer
+    env: python
+    region: oregon
+    plan: free
+    buildCommand: cd visualizer_app && pip install -r requirements.txt
+    startCommand: cd visualizer_app && streamlit run app.py --server.port=$PORT --server.address=0.0.0.0
+    envVars:
+      # Add these manually in Render dashboard
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_KEY
+        sync: false
