@@ -1,0 +1,23 @@
+{
+  "name": "oblivion-contracts",
+  "version": "1.0.0",
+  "description": "Smart contracts for OBLIVION decentralized ML marketplace",
+  "scripts": {
+    "compile": "hardhat compile",
+    "test": "hardhat test",
+    "deploy:shardeum": "hardhat run scripts/deploy-shardeum.js --network shardeum",
+    "deploy:inco": "hardhat run scripts/deploy-inco.js --network inco",
+    "deploy:polygon": "hardhat run scripts/deploy-polygon.js --network polygonAmoy",
+    "deploy:all": "npm run deploy:shardeum && npm run deploy:inco",
+    "verify:polygon": "hardhat verify --network polygonAmoy"
+  },
+  "devDependencies": {
+    "@nomicfoundation/hardhat-toolbox": "^4.0.0",
+    "dotenv": "^16.0.3",
+    "hardhat": "^2.19.0"
+  },
+  "dependencies": {
+    "@inco/lightning": "^0.1.0",
+    "@openzeppelin/contracts": "^5.0.0"
+  }
+}

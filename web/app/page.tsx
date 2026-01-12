@@ -5,19 +5,34 @@ import {
   Activity, Plus, Server, Cpu, Clock, CheckCircle2,
   AlertCircle, ArrowRight, Wallet, LayoutDashboard,
   Search, ExternalLink, Shield, Database, Brain, RefreshCcw, Power,
-  Download, Zap, Users, TrendingUp, Globe, FileCode, Play, Box, Menu, X
+  Download, Zap, Users, TrendingUp, Globe, FileCode, Play, Box, Menu, X, Lock
 } from 'lucide-react';
 import { ethers } from 'ethers';
 import { supabase } from './lib/supabase';
 import contractAbi from './lib/abi.json';
+import { 
+  getNetworkConfig, 
+  getContractAddress, 
+  getChainParams, 
+  isCorrectNetwork,
+  getNativeCurrencySymbol,
+  getTxUrl,
+  ACTIVE_NETWORK,
+  INCO_ENABLED
+} from './lib/config';
 import NetworkVisualization from './components/NetworkVisualization';
+import NetworkStatus from './components/NetworkStatus';
 import { JobCard } from './components/JobCard';
 import WorkerStatus from './components/WorkerStatus';
 import WorkerDistribution from './components/WorkerDistribution';
 import { BrowserWorker } from './lib/browserWorker';
 
-const CONTRACT_ADDRESS = "0x2681849aB3d8E470Dedc08b1a4CED92493886501";
-const RPC_URL = "https://polygon-amoy-bor-rpc.publicnode.com";
+// Dynamic configuration from config.ts
+const networkConfig = getNetworkConfig();
+const CONTRACT_ADDRESS = getContractAddress('oblivionManager');
+const RPC_URL = networkConfig.rpcUrl;
+const CHAIN_ID = networkConfig.chainId;
+const CURRENCY_SYMBOL = getNativeCurrencySymbol();
 
 interface Job {
   id: string | number;
@@ -136,7 +151,7 @@ export default function Home() {
         const bal = await provider.getBalance(accounts[0].address);
         setBalance(ethers.formatEther(bal));
         const network = await provider.getNetwork();
-        setNetworkOk(Number(network.chainId) === 80002);
+        setNetworkOk(isCorrectNetwork(Number(network.chainId)));
       }
     }
   }
@@ -153,23 +168,17 @@ export default function Home() {
       const provider = new ethers.BrowserProvider(ethereum);
       const network = await provider.getNetwork();
 
-      if (Number(network.chainId) !== 80002) {
+      if (!isCorrectNetwork(Number(network.chainId))) {
         try {
           await ethereum.request({
             method: 'wallet_switchEthereumChain',
-            params: [{ chainId: '0x13882' }],
+            params: [{ chainId: networkConfig.chainIdHex }],
           });
         } catch (switchError: any) {
           if (switchError.code === 4902) {
             await ethereum.request({
               method: 'wallet_addEthereumChain',
-              params: [{
-                chainId: '0x13882',
-                chainName: 'Polygon Amoy Testnet',
-                nativeCurrency: { name: 'MATIC', symbol: 'MATIC', decimals: 18 },
-                rpcUrls: ['https://rpc-amoy.polygon.technology'],
-                blockExplorerUrls: ['https://amoy.polygonscan.com']
-              }],
+              params: [getChainParams()],
             });
           }
         }
@@ -248,7 +257,6 @@ export default function Home() {
       const contract = new ethers.Contract(CONTRACT_ADDRESS, contractAbi, signer);
 
       console.log('Creating job with:', { 
-        jobType: 1, // 1 = Training
         scriptUrl: finalScriptUrl, 
         dataUrl: finalDataUrl, 
         reward: ethers.formatEther(rewardWei) + ' MATIC'
@@ -257,7 +265,7 @@ export default function Home() {
       // Estimate gas first to catch errors before sending
       let gasEstimate;
       try {
-        gasEstimate = await contract.createJob.estimateGas(1, finalScriptUrl, finalDataUrl, { value: rewardWei });
+        gasEstimate = await contract.createJob.estimateGas(finalScriptUrl, finalDataUrl, { value: rewardWei });
         console.log('Gas estimate:', gasEstimate.toString());
       } catch (estimateErr: any) {
         console.error('Gas estimation failed:', estimateErr);
@@ -272,9 +280,8 @@ export default function Home() {
       const gasPrice = await provider.send("eth_gasPrice", []);
       console.log('Gas price:', parseInt(gasPrice, 16), 'wei');
       
-      // Use 1 for Training job type (enum value)
       // Use legacy transaction with explicit gasPrice (more compatible)
-      const tx = await contract.createJob(1, finalScriptUrl, finalDataUrl, { 
+      const tx = await contract.createJob(finalScriptUrl, finalDataUrl, { 
         value: rewardWei,
         gasLimit: gasEstimate * 120n / 100n,
         gasPrice: BigInt(gasPrice) // Use legacy gasPrice instead of EIP-1559
@@ -620,6 +627,14 @@ export default function Home() {
             </div>
           </div>
         </div>
+
+        {/* Network Status */}
+        <NetworkStatus
+          shardeumConnected={networkOk}
+          incoReady={INCO_ENABLED}
+          shardeumChainId={CHAIN_ID}
+          account={account || undefined}
+        />
 
         <div className="mt-auto space-y-4">
           {/* Browser Worker Status */}

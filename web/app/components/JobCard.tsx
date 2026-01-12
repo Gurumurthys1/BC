@@ -1,6 +1,7 @@
 import React from 'react';
-import { Database, Brain, Activity, CheckCircle2, Plus, Clock, AlertCircle, ExternalLink, ScrollText } from 'lucide-react';
+import { Database, Brain, Activity, CheckCircle2, Plus, Clock, AlertCircle, ExternalLink, ScrollText, Globe } from 'lucide-react';
 import ModelDownload from './ModelDownload';
+import { getTxUrl, getAddressUrl, ACTIVE_NETWORK, EXPLORER_URL } from '../lib/config';
 
 interface Job {
     id: string | number;
@@ -28,10 +29,25 @@ interface JobCardProps {
 
 export const JobCard: React.FC<JobCardProps> = ({ job, account, onCancel, onTest, isWorkerMode, onWork }) => {
     const [mounted, setMounted] = React.useState(false);
+    const [progress, setProgress] = React.useState(0);
 
     React.useEffect(() => {
         setMounted(true);
     }, []);
+
+    // Calculate progress in useEffect to avoid impure function call during render
+    React.useEffect(() => {
+        if (job.status === 'processing') {
+            const calculateProgress = () => {
+                const elapsed = Date.now() - new Date(job.created_at).getTime();
+                const progressValue = Math.min(95, Math.floor(elapsed / 1000 / 60 * 10));
+                setProgress(progressValue);
+            };
+            calculateProgress();
+            const interval = setInterval(calculateProgress, 1000);
+            return () => clearInterval(interval);
+        }
+    }, [job.status, job.created_at]);
 
     const getStatusTheme = (status: string) => {
         switch (status) {
@@ -85,13 +101,13 @@ export const JobCard: React.FC<JobCardProps> = ({ job, account, onCancel, onTest
                         <div className="flex justify-between items-center px-1">
                             <span className="text-[9px] font-black text-emerald-500 uppercase tracking-[0.2em] animate-pulse">Syncing Neural Weights...</span>
                             <span className="text-[9px] font-mono text-zinc-500">
-                                {Math.min(95, Math.floor((Date.now() - new Date(job.created_at).getTime()) / 1000 / 60 * 10))}%
+                                {progress}%
                             </span>
                         </div>
                         <div className="h-1.5 w-full bg-white/5 rounded-full overflow-hidden border border-white/5">
                             <div 
                                 className="h-full bg-gradient-to-r from-emerald-600 to-emerald-400 animate-[shimmer_2s_infinite] transition-all duration-1000" 
-                                style={{ width: `${Math.min(95, Math.floor((Date.now() - new Date(job.created_at).getTime()) / 1000 / 60 * 10))}%` }}
+                                style={{ width: `${progress}%` }}
                             />
                         </div>
                     </div>
@@ -186,6 +202,18 @@ export const JobCard: React.FC<JobCardProps> = ({ job, account, onCancel, onTest
                     <button className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-zinc-700 hover:text-white transition-colors">
                         Protocol Detail <ExternalLink className="w-3.5 h-3.5" />
                     </button>
+
+                    {/* Explorer Link */}
+                    {job.on_chain_id !== null && job.on_chain_id !== undefined && (
+                        <a
+                            href={`${EXPLORER_URL}/tx/${job.on_chain_id}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-emerald-600 hover:text-emerald-400 transition-colors"
+                        >
+                            <Globe className="w-3.5 h-3.5" /> View on Explorer
+                        </a>
+                    )}
                 </div>
             </div>
         </div>

@@ -15,10 +15,18 @@ export interface WorkerConfig {
 
 export interface JobResult {
   success: boolean;
-  result?: any;
+  result?: unknown;
   error?: string;
   executionTime: number;
   modelOutputUrl?: string;
+}
+
+export interface ModelData {
+  architecture: string;
+  inputSize: number;
+  hiddenSize: number;
+  outputSize: number;
+  weights: Record<string, number[] | Float32Array>;
 }
 
 // Simple neural network for browser-based training
@@ -661,7 +669,7 @@ export const ModelConverter = {
 /**
  * Download model in specified format
  */
-export function downloadModel(modelData: any, jobId: string, format: 'json' | 'pt' | 'onnx' | 'pkl' | 'h5'): void {
+export function downloadModel(modelData: ModelData, jobId: string, format: 'json' | 'pt' | 'onnx' | 'pkl' | 'h5'): void {
   let blob: Blob;
   let filename: string;
 
@@ -700,7 +708,7 @@ export function downloadModel(modelData: any, jobId: string, format: 'json' | 'p
 /**
  * Fetch model data from URL and return parsed content
  */
-export async function fetchModelData(url: string): Promise<any> {
+export async function fetchModelData(url: string): Promise<ModelData> {
   try {
     const response = await fetch(url);
     if (!response.ok) throw new Error('Failed to fetch model');

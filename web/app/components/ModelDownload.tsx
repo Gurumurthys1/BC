@@ -1,44 +1,55 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Download, FileCode, Database, Package, ChevronDown, Check, Loader2 } from 'lucide-react';
-import { downloadModel, fetchModelData } from '../lib/browserWorker';
+import { Download, FileCode, Database, Package, ChevronDown, Loader2, Check } from 'lucide-react';
+import { downloadModel, fetchModelData, ModelData } from '../lib/browserWorker';
 
 interface ModelDownloadProps {
   jobId: string;
   modelUrl: string;
 }
 
-const FORMAT_OPTIONS = [
+type FormatId = 'json' | 'pt' | 'onnx' | 'pkl' | 'h5';
+
+interface FormatOption {
+  id: FormatId;
+  label: string;
+  ext: string;
+  icon: typeof FileCode;
+  desc: string;
+}
+
+const FORMAT_OPTIONS: FormatOption[] = [
   { id: 'json', label: 'JSON', ext: '.json', icon: FileCode, desc: 'Universal format' },
   { id: 'pt', label: 'PyTorch', ext: '.pt', icon: Database, desc: 'For torch.load()' },
   { id: 'onnx', label: 'ONNX', ext: '.onnx', icon: Package, desc: 'Cross-platform' },
   { id: 'pkl', label: 'Pickle', ext: '.pkl', icon: Package, desc: 'Python native' },
   { id: 'h5', label: 'HDF5/Keras', ext: '.h5', icon: Database, desc: 'For tf.keras' },
-] as const;
+];
 
 export const ModelDownload: React.FC<ModelDownloadProps> = ({ jobId, modelUrl }) => {
   const [isOpen, setIsOpen] = useState(false);
-  const [selectedFormat, setSelectedFormat] = useState<typeof FORMAT_OPTIONS[number]>(FORMAT_OPTIONS[0]);
+  const [selectedFormat, setSelectedFormat] = useState<FormatOption>(FORMAT_OPTIONS[0]);
   const [isDownloading, setIsDownloading] = useState(false);
 
-  const handleDownload = async (format: typeof FORMAT_OPTIONS[number]) => {
+  const handleDownload = async (format: FormatOption) => {
     setIsDownloading(true);
     setSelectedFormat(format);
 
     try {
       const modelData = await fetchModelData(modelUrl);
-      downloadModel(modelData, String(jobId).slice(0, 8), format.id as any);
+      downloadModel(modelData, String(jobId).slice(0, 8), format.id);
     } catch (error) {
       console.error('Download failed:', error);
       // Download with default data
-      downloadModel({
+      const defaultData: ModelData = {
         architecture: 'SimpleMLP',
         inputSize: 10,
         hiddenSize: 32,
         outputSize: 1,
         weights: {}
-      }, String(jobId).slice(0, 8), format.id as any);
+      };
+      downloadModel(defaultData, String(jobId).slice(0, 8), format.id);
     }
 
     setIsDownloading(false);

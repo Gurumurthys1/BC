@@ -1,8 +1,8 @@
 'use client';
 
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState, useRef, useCallback } from 'react';
 import { supabase } from '../lib/supabase';
-import { Server, Activity, Globe } from 'lucide-react';
+import { Server } from 'lucide-react';
 
 interface Node {
     id: number;
@@ -23,6 +23,16 @@ export default function NetworkVisualization() {
     const [jobs, setJobs] = useState<Job[]>([]);
     const canvasRef = useRef<HTMLCanvasElement>(null);
 
+    const fetchNodes = useCallback(async () => {
+        const { data } = await supabase.from('nodes').select('*');
+        if (data) setNodes(data);
+    }, []);
+
+    const fetchJobs = useCallback(async () => {
+        const { data } = await supabase.from('jobs').select('id, status, provider_address').in('status', ['processing', 'completed']);
+        if (data) setJobs(data);
+    }, []);
+
     useEffect(() => {
         fetchNodes();
         fetchJobs();
@@ -34,17 +44,7 @@ export default function NetworkVisualization() {
             .subscribe();
 
         return () => { supabase.removeChannel(channel); };
-    }, []);
-
-    async function fetchNodes() {
-        const { data } = await supabase.from('nodes').select('*');
-        if (data) setNodes(data);
-    }
-
-    async function fetchJobs() {
-        const { data } = await supabase.from('jobs').select('id, status, provider_address').in('status', ['processing', 'completed']);
-        if (data) setJobs(data);
-    }
+    }, [fetchNodes, fetchJobs]);
 
     useEffect(() => {
         const canvas = canvasRef.current;

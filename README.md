@@ -1,15 +1,12 @@
-# 🧠 OBLIVION - Decentralized Machine Learning Platform
+# 🧠 OBLIVION - Decentralized Machine Learning Marketplace
 
 <div align="center">
 
-![Oblivion Banner](https://img.shields.io/badge/OBLIVION-Decentralized%20ML-emerald?style=for-the-badge&logo=brain&logoColor=white)
-
-**Privacy-Preserving Distributed Machine Learning on Blockchain**
+**Fully Decentralized ML Training on Blockchain + IPFS**
 
 [![Polygon](https://img.shields.io/badge/Polygon-Amoy-8247E5?style=flat-square&logo=polygon)](https://polygon.technology/)
 [![Next.js](https://img.shields.io/badge/Next.js-14-black?style=flat-square&logo=next.js)](https://nextjs.org/)
 [![Python](https://img.shields.io/badge/Python-3.11+-blue?style=flat-square&logo=python)](https://python.org/)
-[![License](https://img.shields.io/badge/License-MIT-green?style=flat-square)](LICENSE)
 
 </div>
 
@@ -17,281 +14,192 @@
 
 ## 🌟 Overview
 
-Oblivion is a decentralized machine learning platform that enables:
+OBLIVION is a **fully decentralized** machine learning marketplace that connects:
+- **Requesters** who need ML models trained
+- **Workers** who provide computing power
 
-- **🔐 Privacy-Preserving Training**: Train ML models without exposing raw data
-- **🌐 Distributed Compute**: Leverage browser and Python workers worldwide
-- **⛓️ Blockchain Verification**: On-chain job tracking and rewards on Polygon
-- **🤝 Fair Work Distribution**: Automatic load balancing across all connected workers
-- **📊 Real-time Monitoring**: Live visualization of network topology and job status
+**No centralized database required** - all coordination happens on-chain with IPFS for file storage.
 
 ## 🏗️ Architecture
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
-│                         OBLIVION NETWORK                         │
-├─────────────────────────────────────────────────────────────────┤
+│              POLYGON AMOY BLOCKCHAIN                             │
+│     Contract: 0x9EE623E30Ad75C156099d9309924bd989b8f37c4        │
 │                                                                  │
-│  ┌──────────────┐    ┌──────────────┐    ┌──────────────┐       │
-│  │   Browser    │    │   Python     │    │   Server     │       │
-│  │   Workers    │    │   Workers    │    │   Workers    │       │
-│  │  (Web App)   │    │  (CLI)       │    │  (Future)    │       │
-│  └──────┬───────┘    └──────┬───────┘    └──────┬───────┘       │
-│         │                   │                   │                │
-│         └───────────────────┼───────────────────┘                │
-│                             │                                    │
-│                    ┌────────▼────────┐                          │
-│                    │    Supabase     │                          │
-│                    │   (Database +   │                          │
-│                    │    Storage)     │                          │
-│                    └────────┬────────┘                          │
-│                             │                                    │
-│                    ┌────────▼────────┐                          │
-│                    │  Smart Contract │                          │
-│                    │  (Polygon Amoy) │                          │
-│                    └─────────────────┘                          │
-│                                                                  │
+│  • Job creation with ETH rewards                                │
+│  • Worker registration with staking                             │
+│  • Job claiming and completion                                  │
+│  • On-chain statistics                                          │
 └─────────────────────────────────────────────────────────────────┘
+                           │
+           ┌───────────────┴───────────────┐
+           │                               │
+           ▼                               ▼
+┌──────────────────────┐      ┌─────────────────────────────┐
+│        IPFS          │      │     WORKER NODES            │
+│   (File Storage)     │      │  decentralized_worker.py    │
+│                      │      │                             │
+│  • Training scripts  │      │  • Polls blockchain         │
+│  • Datasets          │      │  • Trains models (PyTorch)  │
+│  • Trained models    │      │  • Differential privacy     │
+│  • ZK proofs         │      │  • Submits results on-chain │
+└──────────────────────┘      └─────────────────────────────┘
 ```
 
-## 🚀 Features
+## 🎯 Key Features
 
-### For Job Creators
-- Submit training and inference jobs via web interface
-- Connect MetaMask wallet for on-chain job tracking
-- Download trained models in multiple formats (JSON, PyTorch, ONNX, HDF5)
-- Real-time job status monitoring
-
-### For Workers
-- **Browser Workers**: Contribute compute directly from your browser
-- **Python Workers**: Run dedicated high-performance worker nodes
-- Fair job distribution ensures equal opportunity
-- Automatic heartbeat and job claiming
-
-### Network Features
-- Live network topology visualization
-- Worker statistics dashboard
-- Automatic stale job recovery
-- On-chain settlement and rewards
+| Feature | Description |
+|---------|-------------|
+| **Fully Decentralized** | No centralized database - blockchain + IPFS only |
+| **Staking System** | Workers stake collateral, lose it if they cheat |
+| **Fair Distribution** | Workers with fewer jobs get priority |
+| **Differential Privacy** | Mathematical privacy guarantees (ε=1.0) |
+| **Quality Verification** | Automatic rejection of undertrained models |
+| **On-Chain Rewards** | Workers paid in MATIC upon completion |
 
 ## 📁 Project Structure
 
 ```
 BC/
-├── web/                    # Next.js 14 Frontend
-│   ├── app/
-│   │   ├── components/     # React components
-│   │   ├── lib/           # Supabase client, browser worker
-│   │   └── page.tsx       # Main application
-│   └── public/
-│
-├── node-client/           # Python Worker Node
-│   ├── sharded_worker.py  # Main worker script
-│   ├── aggregator.py      # Gradient aggregation
-│   └── requirements.txt
-│
-├── contracts/             # Solidity Smart Contracts
+├── contracts/                 # Smart contracts
 │   ├── src/
-│   │   ├── VouchManager.sol
-│   │   └── MockVerifier.sol
-│   └── deploy_contracts.py
+│   │   ├── OblivionManagerSimple.sol  # Main contract (deployed)
+│   │   └── MockVerifier.sol           # ZK proof verifier
+│   └── deploy_new.py          # Deployment script
 │
-├── database/              # SQL Schemas
-│   ├── schema.sql
-│   ├── fair_job_distribution.sql
-│   └── create_claim_job.sql
+├── node-client/               # Python worker node
+│   ├── blockchain_client.py   # Contract interaction
+│   ├── ipfs_client.py         # IPFS file storage
+│   ├── decentralized_worker.py # Main worker process
+│   ├── privacy.py             # Differential privacy
+│   ├── quality_verification.py # Model quality checks
+│   ├── zk_proofs.py           # ZK proof generation
+│   ├── network_config.py      # Network configuration
+│   └── verify_system.py       # System verification
 │
-├── model/                 # ML Model & EZKL Proofs
-│   ├── train.py
-│   ├── network.onnx
-│   └── compile_circuit.py
+├── web/                       # Next.js frontend
+│   └── app/
+│       ├── page.tsx           # Main dashboard
+│       ├── components/        # React components
+│       └── lib/
+│           ├── blockchain.ts  # Contract client
+│           ├── config.ts      # Network config
+│           └── hooks.ts       # React hooks
 │
-├── visualizer_app/        # Streamlit Dashboard
+├── visualizer_app/            # Streamlit dashboard (alternative)
 │   └── app.py
 │
-└── sample_job/           # Example Training Data
-    ├── dataset.csv
-    └── training_script.py
+└── sample_job/                # Example training job
+    ├── training_script.py
+    └── dataset.csv
 ```
 
-## 🛠️ Setup
+## 🚀 Quick Start
 
 ### Prerequisites
 
-- Node.js 18+ 
 - Python 3.11+
-- MetaMask wallet
-- Supabase account
+- Node.js 18+
+- MetaMask wallet with Polygon Amoy MATIC
 
-### 1. Clone Repository
+### 1. Setup Environment
 
 ```bash
-git clone https://github.com/sanjaykumar-nb/BC.git
+# Clone and setup
 cd BC
-```
+python -m venv venv
+.\venv\Scripts\activate  # Windows
+pip install -r node-client/requirements.txt
 
-### 2. Frontend Setup
-
-```bash
+# Setup frontend
 cd web
 npm install
-
-# Create environment file
-cp .env.example .env.local
-# Edit .env.local with your Supabase credentials
 ```
 
-**Required environment variables for web:**
-```env
-NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
-NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
+### 2. Configure Environment
+
+Create `.env` files:
+
+**node-client/.env:**
 ```
-
-### 3. Python Worker Setup
-
-```bash
-cd node-client
-python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
-pip install -r requirements.txt
-
-# Create environment file
-cp .env.example .env
-# Edit .env with your credentials
-```
-
-**Required environment variables for worker:**
-```env
-SUPABASE_URL=your_supabase_url
-SUPABASE_KEY=your_supabase_anon_key
 RPC_URL=https://polygon-amoy-bor-rpc.publicnode.com
-CONTRACT_ADDRESS=your_deployed_contract_address
-PRIVATE_KEY=your_wallet_private_key  # Optional, for on-chain settlement
+CONTRACT_ADDRESS=0x9EE623E30Ad75C156099d9309924bd989b8f37c4
+PRIVATE_KEY=your_private_key
 ```
 
-### 4. Database Setup
-
-Run the SQL files in your Supabase SQL Editor in this order:
-1. `database/schema.sql`
-2. `database/fair_job_distribution.sql`
-
-### 5. Smart Contract (Optional)
-
-Deploy contracts to Polygon Amoy:
-```bash
-cd contracts
-python deploy_contracts.py
+**web/.env:**
+```
+NEXT_PUBLIC_CONTRACT_ADDRESS=0x9EE623E30Ad75C156099d9309924bd989b8f37c4
 ```
 
-## 🏃 Running
+### 3. Run the System
 
-### Start Frontend
-
+**Start Frontend:**
 ```bash
 cd web
 npm run dev
+# Open http://localhost:3000
 ```
-Open http://localhost:3000
 
-### Start Python Worker
-
+**Start Worker:**
 ```bash
 cd node-client
-python sharded_worker.py
+python decentralized_worker.py
 ```
 
-### Start Visualizer (Optional)
-
+**Verify System:**
 ```bash
-cd visualizer_app
-streamlit run app.py
+cd node-client
+python verify_system.py
 ```
 
-## 💡 Usage
+## 📊 Current Status
 
-### Creating a Job
+| Component | Status |
+|-----------|--------|
+| Smart Contract | ✅ Deployed on Polygon Amoy |
+| Blockchain Client | ✅ Working |
+| IPFS Client | ✅ Working |
+| Worker Node | ✅ Working |
+| Frontend | ✅ Working |
+| Differential Privacy | ✅ Enabled (ε=1.0) |
 
-1. Connect your MetaMask wallet on the web interface
-2. Click "New Job" and fill in:
-   - Job Type: Training or Inference
-   - Reward amount (MATIC)
-   - Model hash or script URL
-3. Submit the transaction
+## 🔗 Contract Details
 
-### Running as a Worker
+- **Network:** Polygon Amoy Testnet (Chain ID: 80002)
+- **Contract:** `0x9EE623E30Ad75C156099d9309924bd989b8f37c4`
+- **Minimum Stake:** 0.001 MATIC
+- **Explorer:** [View on PolygonScan](https://amoy.polygonscan.com/address/0x9EE623E30Ad75C156099d9309924bd989b8f37c4)
 
-**Browser Worker:**
-- Simply keep the web app open with wallet connected
-- Worker automatically claims and processes jobs
+## 📝 How It Works
 
-**Python Worker:**
-- Run `python sharded_worker.py`
-- Worker registers and starts polling for jobs
-- Supports concurrent job processing
+1. **Requester** creates a job on-chain with reward
+2. **Worker** claims job (stakes 50% of reward)
+3. **Worker** downloads script/data from IPFS
+4. **Worker** trains model with differential privacy
+5. **Worker** uploads model to IPFS
+6. **Worker** submits result on-chain
+7. **Smart contract** pays worker (reward + returned stake)
 
-### Downloading Models
+## 🛠️ Development
 
-After a training job completes:
-1. Click the "Model" dropdown on the job card
-2. Select format: JSON, PyTorch (.pt), ONNX, Pickle, or HDF5
-3. Model downloads automatically
+**Run Tests:**
+```bash
+cd node-client
+python verify_system.py      # System verification
+python blockchain_client.py  # Blockchain test
+python test_networks.py      # Network connectivity
+```
 
-## 🔧 Configuration
-
-### Worker Load Balancing
-
-The system uses fair distribution to ensure work is split evenly:
-- Each worker tracks `current_jobs` count
-- Workers with fewer jobs get priority
-- Maximum 2 concurrent jobs per worker (configurable)
-- Stale jobs automatically reset after 10 minutes
-
-### Network Settings
-
-| Setting | Default | Description |
-|---------|---------|-------------|
-| Heartbeat Interval | 15s | Worker health check frequency |
-| Poll Interval | 2-5s | Job polling frequency (adaptive) |
-| Max Concurrent Jobs | 2 | Jobs per worker limit |
-| Stale Job Timeout | 10min | Auto-reset stuck jobs |
-
-## 🔐 Security
-
-- **No raw data exposure**: Workers only see encrypted data shards
-- **Sandboxed execution**: Python workers run scripts in restricted environment
-- **On-chain verification**: Job completion verified on Polygon
-- **RLS policies**: Database access controlled via Supabase RLS
-
-## 🛣️ Roadmap
-
-- [ ] EZKL proof verification for model integrity
-- [ ] Federated learning with differential privacy
-- [ ] GPU worker support (CUDA/WebGPU)
-- [ ] Token-based incentives
-- [ ] Model marketplace
-- [ ] Cross-chain deployment
-
-## 🤝 Contributing
-
-Contributions are welcome! Please:
-1. Fork the repository
-2. Create a feature branch
-3. Commit your changes
-4. Push to the branch
-5. Open a Pull Request
-
-## 📄 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## 👥 Team
-
-Built with ❤️ by the Oblivion team
+**TypeScript Check:**
+```bash
+cd web
+npx tsc --noEmit
+```
 
 ---
 
 <div align="center">
-
-**[Documentation](WORKER_DISTRIBUTION.md)** • **[Report Bug](https://github.com/sanjaykumar-nb/BC/issues)** • **[Request Feature](https://github.com/sanjaykumar-nb/BC/issues)**
-
+Built for decentralized ML computation 🧠⛓️
 </div>
