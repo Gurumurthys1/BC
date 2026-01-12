@@ -282,7 +282,7 @@ class DecentralizedWorker:
         
         success = self.blockchain.register_worker(
             self.node_id,
-            stake_eth=self.config.MIN_STAKE_ETH
+            stake_wei=int(self.config.MIN_STAKE_ETH * 10**18)
         )
         
         if success:
